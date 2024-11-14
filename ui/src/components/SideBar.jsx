@@ -18,9 +18,9 @@ function Navbar() {
       <div className="flex flex-col items-center justify-between w-50 h-full bg-white rounded-2xl">
         <div className="flex-[0.3] w-48">
           {/* <ComputerDesktopIcon className="size-10"></ComputerDesktopIcon> */}
-          <img className="" src={logo} />
+          <img className="rounded-2xl" src={logo} />
         </div>
-        <div className="flex flex-col flex-[0.6] gap-4">
+        <div className="flex flex-col flex-[0.65] gap-4">
           <Link
             to="/"
             class="rounded-md hover:text-s hover:bg-sky-800 text-sky-800 px-3 py-2 text-sm font-medium"
@@ -62,7 +62,7 @@ function Navbar() {
             </div>
           </Link>
         </div>
-        <div className="flex-[0.1]">
+        <div className="flex-[0.05]">
           <div className="flex">
             <CogIcon className="mr-2 size-5"></CogIcon> Settings
           </div>

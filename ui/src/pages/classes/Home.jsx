@@ -1,6 +1,32 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  InformationCircleIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/solid";
+
+import { Link} from 'react-router-dom'
 
 function Home() {
+  const [classes, setClasses] = useState([]);
+
+  const getClasses = async () => {
+    try {
+      const results = await axios({
+        method: "GET",
+        url: "http://localhost:3010/classes",
+      });
+
+      setClasses(results.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getClasses();
+  });
+
   return (
     <>
       <div className="w-full my-2 p-4">
@@ -12,12 +38,75 @@ function Home() {
           perferendis facere ab possimus?
         </p>
         <hr />
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-gray-300 text-center p-2">Col 1</div>
-          <div className="bg-gray-300 text-center p-2">Col 1</div>
-          <div className="bg-gray-300 text-center p-2">Col 1</div>
-          <div className="bg-gray-300 text-center p-2">Col 1</div>
-          <div className="bg-gray-300 text-center p-2">Col 1</div>
+        <div className="flex flex-row w-full my-2">
+          <div className="flex-1"></div>
+        </div>
+        <div className="flex flex-row my-2">
+          <div className="my-3 mr-2">
+            <button className="rounded-xl px-3 py-2 text-sky-700 hover:text-white hover:bg-sky-700 border border-sky-100 font-medium">
+              Active
+            </button>
+          </div>
+          <div className="my-3 mr-2">
+            <button className="rounded-xl px-3 py-2 text-sky-700 hover:text-white hover:bg-sky-700 border border-sky-100 font-medium">
+              Inactive
+            </button>
+          </div>
+          <div className="my-3 mr-2">
+            <button className="rounded-xl px-3 py-2 text-sky-700 hover:text-white hover:bg-sky-700 border border-sky-100 font-medium">
+              Total
+            </button>
+          </div>
+        </div>
+
+        <hr />
+        <div className="w-full my-2">
+          <div className="table border w-full">
+            <div className="table-header-group text-center p-3 bg-sky-50 font-bold">
+              <div className="table-row ">
+                <div className="table-cell p-2">Id</div>
+                <div className="table-cell p-2">Name</div>
+                <div className="table-cell p-2">Total Meetings</div>
+                <div className="table-cell ">Total Students</div>
+                <div className="table-cell ">Status</div>
+                <div className="table-cell ">Actions</div>
+              </div>
+            </div>
+            <div className="table-row-group text-center">
+              {classes.map((clas) => {
+                const { id, name, totalMeetings, totalStudents, status } = clas;
+                return (
+                  <div className="table-row">
+                    <div className="table-cell text-center p-2">{id}</div>
+                    <div className="table-cell text-center p-2 font-medium text-md text-sky-700">
+                      <div className="flex">
+                        {name}
+                        <Link to={`/classes/details/${id}`}>
+                        <InformationCircleIcon className="ml-2 size-5"></InformationCircleIcon> 
+                        MM
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="table-cell text-center p-2">
+                      {totalMeetings}
+                    </div>
+                    <div className="table-cell text-center p-2">
+                      {totalStudents}
+                    </div>
+                    <div className="table-cell text-center p-2">
+                      {status ? "Active" : ""}
+                    </div>
+                    <div className="table-cell text-center p-2">
+                      <button className="rounded-md font-small px-2 py-1 border border-red-100 text-red-700 hover:text-white hover:bg-red-700">
+                        {" "}
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </>

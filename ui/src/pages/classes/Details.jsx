@@ -1,17 +1,58 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 function Details() {
+  const { id } = useParams();
+  const [classObj, setClass] = useState({});
+
+  const getClassById = async () => {
+    try {
+      const result = await axios({
+        method: "GET",
+        url: `http://localhost:3010/classes/${id}`,
+      });
+
+      setClass(result.data);
+      console.log(result.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getClassById();
+  }, []);
+
   return (
-    <div>
-      <div className="text-center my-2 p-2">
-        <h1 className="text-red-700 font-bold text-xl"> Classes details</h1>
-        <p>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum neque
-          commodi velit quis recusandae dignissimos soluta quibusdam eius quo
-          numquam expedita consequuntur maxime, tempora accusantium. Error
-          perferendis facere ab possimus?
-        </p>
+    <div className="w-full my-2 p-4">
+      <div className="flex flex-row justify-between text my-2 p-2">
+        <div>
+          <p className="text-gray-700 text-sm"> Classes details</p>
+          <p className="font-bold text-3xl">{classObj.name}</p>
+        </div>
+        <div>
+          <p className="text-gray-700 text-sm">Price </p>
+          <p className="font-bold text-3xl text-green-700">
+            Rp. {classObj.price}
+          </p>
+        </div>
       </div>
+    <div className="grid grid-cols-5 gap-4 my-3">
+      <div className="border-t-4 border-t-sky-700 rounded-md p-3">
+        <p className="text-sm text-gray-700">Status</p>
+        <p className={`${classObj.status ? "text-green-700" : "text-red-700"} text-2xl font-bold` }>{
+          classObj.status ? "Active" : "Inactive"
+          }</p>
+      </div>
+      
+      <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
+        <p className="text-sm text-gray-700">Total Meetings</p>
+          
+      </div>
+
+    </div>
       <hr />
     </div>
   );

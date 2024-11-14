@@ -1,13 +1,13 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-import Navbar from "../components/Navbar";
+import SideBar from "../components/SideBar";
 
 function MainLayout() {
   return (
     <div className="w-full flex h-svh max-h-svh">
-      <div className="h-full flex-[0.175] bg-blue-100 ">
-        <Navbar></Navbar>
+      <div className="h-full flex-[0.175] bg-sky-700 ">
+        <SideBar></SideBar>
       </div>
 
       <div className="h-full flex-1">

@@ -3,7 +3,7 @@ import React from "react";
 function Home() {
   return (
     <>
-      <div className="w-full my-2 p-3">
+      <div className="w-full my-2 p-4">
         <h1 className="text-sky-700 font-bold text-xl"> Classes List</h1>
         <p>
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum neque

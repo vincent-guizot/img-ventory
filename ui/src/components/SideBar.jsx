@@ -7,20 +7,23 @@ import {
   UserIcon,
   HomeIcon,
   ComputerDesktopIcon,
+  CogIcon,
 } from "@heroicons/react/24/solid";
+
+import logo from "../assets/1.jpg";
 
 function Navbar() {
   return (
     <>
-     
-      <div className="grid h-full place-content-center bg-sky-800">
-        <div className="">
-          <ComputerDesktopIcon className="text-white"></ComputerDesktopIcon>
+      <div className="flex flex-col items-center justify-between w-50 h-full bg-white rounded-2xl">
+        <div className="flex-[0.3] w-48">
+          {/* <ComputerDesktopIcon className="size-10"></ComputerDesktopIcon> */}
+          <img className="" src={logo} />
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col flex-[0.6] gap-4">
           <Link
             to="/"
-            class="rounded-md hover:text-sky-800 hover:bg-white text-white px-3 py-2 text-sm font-medium"
+            class="rounded-md hover:text-s hover:bg-sky-800 text-sky-800 px-3 py-2 text-sm font-medium"
             aria-current="page"
           >
             <div className="flex flex-row">
@@ -30,7 +33,7 @@ function Navbar() {
           </Link>
           <Link
             to="/classes"
-            class="rounded-md  hover:text-sky-800 hover:bg-white text-white px-3 py-2 text-sm font-medium"
+            class="rounded-md  hover:text-white hover:bg-sky-800 text-sky-800 px-3 py-2 text-sm font-medium"
             aria-current="page"
           >
             <div className="flex flex-row">
@@ -40,7 +43,7 @@ function Navbar() {
           </Link>
           <Link
             to="/meetings"
-            class="rounded-md  hover:text-sky-800 hover:bg-white text-white px-3 py-2 text-sm font-medium"
+            class="rounded-md  hover:text-white hover:bg-sky-800 text-sky-800 px-3 py-2 text-sm font-medium"
             aria-current="page"
           >
             <div className="flex flex-row">
@@ -50,7 +53,7 @@ function Navbar() {
           </Link>
           <Link
             to="/students"
-            class="rounded-md  hover:text-sky-800 hover:bg-white text-white px-3 py-2 text-sm font-medium"
+            class="rounded-md  hover:text-white hover:bg-sky-800 text-sky-800 px-3 py-2 text-sm font-medium"
             aria-current="page"
           >
             <div className="flex flex-row">
@@ -58,6 +61,11 @@ function Navbar() {
               <div>Students</div>
             </div>
           </Link>
+        </div>
+        <div className="flex-[0.1]">
+          <div className="flex">
+            <CogIcon className="mr-2 size-5"></CogIcon> Settings
+          </div>
         </div>
       </div>
     </>

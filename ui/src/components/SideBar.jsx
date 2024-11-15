@@ -8,6 +8,7 @@ import {
   HomeIcon,
   ComputerDesktopIcon,
   CogIcon,
+  PencilIcon,
 } from "@heroicons/react/24/solid";
 
 import logo from "../assets/1.jpg";
@@ -61,10 +62,20 @@ function Navbar() {
               <div>Students</div>
             </div>
           </Link>
+          <Link
+            to="/tasks"
+            class="rounded-md  hover:text-white hover:bg-sky-800 text-sky-800 px-3 py-2 text-sm font-medium"
+            aria-current="page"
+          >
+            <div className="flex flex-row">
+              <PencilIcon className="mr-2 size-5"></PencilIcon>
+              <div>Tasks</div>
+            </div>
+          </Link>
         </div>
         <div className="flex-[0.05]">
           <div className="flex">
-            <CogIcon className="mr-2 size-5"></CogIcon> Settings
+            <CogIcon className="mr-2 size-5"></CogIcon> <div>Settings</div>
           </div>
         </div>
       </div>

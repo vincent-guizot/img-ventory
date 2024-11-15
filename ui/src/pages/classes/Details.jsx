@@ -1,28 +1,16 @@
 import React, { useState, useEffect } from "react";
 
-import axios from "axios";
+import { getClassById } from "../../axios";
 import { useParams } from "react-router-dom";
 
 function Details() {
   const { id } = useParams();
   const [classObj, setClass] = useState({});
 
-  const getClassById = async () => {
-    try {
-      const result = await axios({
-        method: "GET",
-        url: `http://localhost:3010/classes/${id}`,
-      });
-
-      setClass(result.data);
-      console.log(result.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
-    getClassById();
+    getClassById(id, (data) => {
+      setClass(data);
+    });
   }, []);
 
   return (
@@ -70,7 +58,7 @@ function Details() {
 
         <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
           <p className="text-sm text-gray-700">Finish Date</p>
-          <p className="text-2xl font-medium">{classObj.finishDate} people</p>
+          <p className="text-2xl font-medium">{classObj.finishDate} </p>
         </div>
       </div>
 

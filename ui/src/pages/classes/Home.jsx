@@ -1,30 +1,19 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   InformationCircleIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/solid";
 
-import { Link} from 'react-router-dom'
+import { Link } from "react-router-dom";
+import { getClasses } from "../../axios";
 
 function Home() {
   const [classes, setClasses] = useState([]);
-
-  const getClasses = async () => {
-    try {
-      const results = await axios({
-        method: "GET",
-        url: "http://localhost:3010/classes",
-      });
-
-      setClasses(results.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
+ 
   useEffect(() => {
-    getClasses();
+    getClasses((data) => {
+      setClasses(data)
+    });
   });
 
   return (
@@ -73,37 +62,47 @@ function Home() {
               </div>
             </div>
             <div className="table-row-group text-center">
-              {classes.map((clas) => {
-                const { id, name, totalMeetings, totalStudents, status } = clas;
-                return (
-                  <div className="table-row">
-                    <div className="table-cell text-center p-2">{id}</div>
-                    <div className="table-cell text-center p-2 font-medium text-md text-sky-700">
-                      <div className="flex">
-                        {name}
-                        <Link to={`/classes/details/${id}`}>
-                        <InformationCircleIcon className="ml-2 size-5"></InformationCircleIcon> 
-                        </Link>
+              {classes.length > 0 ? (
+                classes.map((clas) => {
+                  const { id, name, totalMeetings, totalStudents, status } =
+                    clas;
+                  return (
+                    <div className="table-row">
+                      <div className="table-cell text-center p-2">{id}</div>
+                      <div className="table-cell text-center p-2 font-medium text-md text-sky-700">
+                        <div className="flex">
+                          {name}
+                          <Link to={`/classes/details/${id}`}>
+                            <InformationCircleIcon className="ml-2 size-5"></InformationCircleIcon>
+                          </Link>
+                        </div>
+                      </div>
+                      <div className="table-cell text-center p-2">
+                        {totalMeetings}
+                      </div>
+                      <div className="table-cell text-center p-2">
+                        {totalStudents}
+                      </div>
+                      <div className="table-cell text-center p-2">
+                        {status ? "Active" : ""}
+                      </div>
+                      <div className="table-cell text-center p-2">
+                        <button className="rounded-md font-small px-2 py-1 border border-red-100 text-red-700 hover:text-white hover:bg-red-700">
+                          Delete
+                        </button>
+                        
+                        <button className="rounded-md font-small px-2 py-1 border border-blue-100 text-blue-700 hover:text-white hover:bg--700">
+                          Edit
+                        </button>
+
+                        
                       </div>
                     </div>
-                    <div className="table-cell text-center p-2">
-                      {totalMeetings}
-                    </div>
-                    <div className="table-cell text-center p-2">
-                      {totalStudents}
-                    </div>
-                    <div className="table-cell text-center p-2">
-                      {status ? "Active" : ""}
-                    </div>
-                    <div className="table-cell text-center p-2">
-                      <button className="rounded-md font-small px-2 py-1 border border-red-100 text-red-700 hover:text-white hover:bg-red-700">
-                        {" "}
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <h1>Loading   </h1>
+              )}
             </div>
           </div>
         </div>

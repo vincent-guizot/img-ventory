@@ -39,21 +39,47 @@ function Details() {
           </p>
         </div>
       </div>
-    <div className="grid grid-cols-5 gap-4 my-3">
-      <div className="border-t-4 border-t-sky-700 rounded-md p-3">
-        <p className="text-sm text-gray-700">Status</p>
-        <p className={`${classObj.status ? "text-green-700" : "text-red-700"} text-2xl font-bold` }>{
-          classObj.status ? "Active" : "Inactive"
-          }</p>
-      </div>
-      
-      <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
-        <p className="text-sm text-gray-700">Total Meetings</p>
-          
+      <div className="grid grid-cols-5 gap-5 my-3">
+        <div className="border-t-4 border-t-sky-700 rounded-md p-3">
+          <p className="text-sm text-gray-700">Status</p>
+          <p
+            className={`${
+              classObj.status ? "text-green-700" : "text-red-700"
+            } text-2xl font-bold`}
+          >
+            {classObj.status ? "Active" : "Inactive"}
+          </p>
+        </div>
+
+        <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
+          <p className="text-sm text-gray-700">Total Meetings</p>
+          <p className="text-2xl font-bold">
+            {classObj.totalMeetings} meetings
+          </p>
+        </div>
+
+        <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
+          <p className="text-sm text-gray-700">Total Students</p>
+          <p className="text-2xl font-bold">{classObj.totalStudents} people</p>
+        </div>
+
+        <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
+          <p className="text-sm text-gray-700">Start Date</p>
+          <p className="text-2xl font-medium">{classObj.startDate} </p>
+        </div>
+
+        <div className="border-t-4 border-t-sky-700 rounded-md p-3 ">
+          <p className="text-sm text-gray-700">Finish Date</p>
+          <p className="text-2xl font-medium">{classObj.finishDate} people</p>
+        </div>
       </div>
 
-    </div>
       <hr />
+      <div className="grid grid-cols-3">
+        <div className="">Meetings</div>
+        <div></div>
+        <div></div>
+      </div>
     </div>
   );
 }

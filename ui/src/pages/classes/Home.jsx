@@ -83,7 +83,6 @@ function Home() {
                         {name}
                         <Link to={`/classes/details/${id}`}>
                         <InformationCircleIcon className="ml-2 size-5"></InformationCircleIcon> 
-                        MM
                         </Link>
                       </div>
                     </div>

@@ -15,7 +15,7 @@ export default {
             element: <Home></Home>
         },{
             path: "add",
-            element: <Add></Addd>
+            element: <Add></Add>
         },
         {
             path: "edit/:id",

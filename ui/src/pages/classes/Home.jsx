@@ -51,7 +51,7 @@ function Home() {
             </button>
           </div>
         </div>
-        
+
         <hr />
         <div className="w-full my-2">
           <div className="table border w-full">

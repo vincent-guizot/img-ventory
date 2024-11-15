@@ -9,26 +9,30 @@ import { getClasses } from "../../axios";
 
 function Home() {
   const [classes, setClasses] = useState([]);
- 
+
   useEffect(() => {
     getClasses((data) => {
-      setClasses(data)
+      setClasses(data);
     });
   });
 
   return (
     <>
       <div className="w-full my-2 p-4">
-        <h1 className="text-sky-700 font-bold text-xl"> Classes List</h1>
-        <p>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum neque
-          commodi velit quis recusandae dignissimos soluta quibusdam eius quo
-          numquam expedita consequuntur maxime, tempora accusantium. Error
-          perferendis facere ab possimus?
-        </p>
-        <hr />
-        <div className="flex flex-row w-full my-2">
-          <div className="flex-1"></div>
+        <div className="flex justify-between w-full my-2">
+          <div className="flex-[0.8]">
+            <h1 className="text-sky-700 font-bold text-xl"> Classes List</h1>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
+          </div>
+
+          <div className="flex-[0.2]">
+            <Link
+              to="/classes/add"
+              className="rounded-xl px-3 py-2 text-white bg-sky-700  border-sky-100 hover:bg-sky-900 hover:text-white font-medium"
+            >
+              Add Class
+            </Link>
+          </div>
         </div>
         <div className="flex flex-row my-2">
           <div className="my-3 mr-2">
@@ -47,7 +51,7 @@ function Home() {
             </button>
           </div>
         </div>
-
+        
         <hr />
         <div className="w-full my-2">
           <div className="table border w-full">
@@ -90,18 +94,17 @@ function Home() {
                         <button className="rounded-md font-small px-2 py-1 border border-red-100 text-red-700 hover:text-white hover:bg-red-700">
                           Delete
                         </button>
-                        
-                        <button className="rounded-md font-small px-2 py-1 border border-blue-100 text-blue-700 hover:text-white hover:bg--700">
+
+                        <button className="rounded-md font-small px-2 py-1 border border-blue-100 text-blue-700 hover:text-white hover:bg-blue-700">
+                          {/* <PencilSquareIcon></PencilSquareIcon> */}
                           Edit
                         </button>
-
-                        
                       </div>
                     </div>
                   );
                 })
               ) : (
-                <h1>Loading   </h1>
+                <h1>Loading </h1>
               )}
             </div>
           </div>

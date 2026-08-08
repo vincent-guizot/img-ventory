@@ -1,5 +1,7 @@
 # img-ventory
 
+![img-ventory banner](docs/banner.png)
+
 **Store. Upload. Manage.**
 
 A lightweight, frontend-only Cloudinary image upload manager built with React 19, JavaScript, and Tailwind CSS. Not Google Drive, not Dropbox — just a beautiful, focused UI for uploading and browsing images via Cloudinary's unsigned upload API.
@@ -23,21 +25,37 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your own Cloudinary cloud name and **unsigned** upload preset:
+Edit `.env` with your own Cloudinary credentials:
 
 ```
 VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
 VITE_CLOUDINARY_UPLOAD_PRESET=your-unsigned-preset
+VITE_CLOUDINARY_FOLDER=img-ventory
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 > Create an unsigned upload preset from your Cloudinary dashboard under
 > **Settings → Upload → Upload presets → Add upload preset**, and set
-> **Signing Mode** to `Unsigned`.
+> **Signing Mode** to `Unsigned`. This preset (plus the cloud name) is safe
+> to expose to the browser — it's used for uploads only.
+>
+> `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` come from **Settings →
+> Access Keys**. These are server-only secrets (no `VITE_` prefix) used by
+> the serverless functions in `api/` to list and delete images — never
+> expose them to the browser.
 
 Then run the dev server:
 
 ```bash
 npm run dev
+```
+
+To also exercise the `api/` serverless functions locally (gallery listing
+and delete), run through the Vercel CLI instead:
+
+```bash
+npm run dev:vercel
 ```
 
 Build for production:
@@ -50,6 +68,9 @@ npm run preview
 ## Project Structure
 
 ```
+api/
+  _lib/             # Shared Cloudinary auth/signing helpers (server-only)
+  images/           # Serverless functions: list (GET) and delete (DELETE) via Cloudinary Admin API
 src/
   components/       # Shared UI primitives (Button, Card, Input...) and layout (Sidebar, Navbar)
   features/         # Feature-based modules
@@ -74,11 +95,13 @@ the gallery grid immediately below.
 
 ## Real data, not mocks
 
-Cloudinary's unsigned upload flow has no client-safe "list all images" endpoint, so there's no
-way to fetch a full gallery from Cloudinary directly in the browser. Instead, every image
-actually uploaded through this app is persisted to `localStorage` (see
-`src/features/gallery/hooks/useImages.js`), so the Gallery, Storage stats, and sidebar widget
-all reflect real uploads from this browser — nothing is hardcoded or seeded with sample data.
+There's no client-safe way to list Cloudinary assets directly from the browser — the Admin
+Search API requires the API Secret, which must never ship to client JS. Instead, `api/images`
+is a serverless function that holds the secret server-side and proxies the search request to
+Cloudinary on the app's behalf (see `src/features/gallery/hooks/useImages.js` and
+`src/services/cloudinary.service.js`). So the Gallery, Storage stats, and sidebar widget all
+reflect the actual contents of your Cloudinary folder — nothing is hardcoded, seeded, or read
+from `localStorage`.
 
 ## Dark mode
 
@@ -88,6 +111,7 @@ variants throughout the component tree.
 
 ## Notes
 
-- Uploads call Cloudinary's unsigned upload endpoint directly from the browser — no backend required.
-- Deliberately excluded per product scope: authentication, analytics/charts, favorites, trash, delete/rename, folders, sharing, and permissions.
+- Uploads call Cloudinary's unsigned upload endpoint directly from the browser — no backend required for uploading.
+- Listing and deleting images go through the serverless functions in `api/`, which hold the API Secret server-side.
+- Deliberately excluded per product scope: authentication, analytics/charts, favorites, trash, rename, folders, sharing, and permissions. (Renaming an asset's display name in the Cloudinary console *is* reflected in the gallery, since the app reads Cloudinary's `display_name` field.)
 

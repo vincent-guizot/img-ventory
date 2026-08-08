@@ -1,33 +1,71 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
+import js from "@eslint/js";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+
+const browserGlobals = {
+  window: "readonly",
+  document: "readonly",
+  navigator: "readonly",
+  console: "readonly",
+  FormData: "readonly",
+  File: "readonly",
+  URL: "readonly",
+  URLSearchParams: "readonly",
+  fetch: "readonly",
+  setTimeout: "readonly",
+  clearTimeout: "readonly",
+  localStorage: "readonly",
+};
+
+const nodeGlobals = {
+  process: "readonly",
+  Buffer: "readonly",
+  fetch: "readonly",
+  URLSearchParams: "readonly",
+  console: "readonly",
+  __dirname: "readonly",
+};
 
 export default [
-  { ignores: ['dist'] },
+  js.configs.recommended,
   {
-    files: ['**/*.{js,jsx}'],
+    files: ["src/**/*.{js,jsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: browserGlobals,
       parserOptions: {
-        ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
-        sourceType: 'module',
       },
     },
     plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
+      react,
+      "react-hooks": reactHooks,
     },
     rules: {
-      ...js.configs.recommended.rules,
+      ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off",
+      "react/no-unescaped-entities": "off",
+      "no-unused-vars": "warn",
+    },
+    settings: {
+      react: { version: "detect" },
     },
   },
-]
+  {
+    files: ["api/**/*.js", "vite.config.js", "tailwind.config.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: nodeGlobals,
+    },
+    rules: {
+      "no-unused-vars": "warn",
+    },
+  },
+  {
+    ignores: ["dist/**", "node_modules/**"],
+  },
+];

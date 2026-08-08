@@ -7,7 +7,8 @@
     "dev": "vite --port 5125",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "dev:vercel": "vercel dev"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
@@ -26,7 +27,7 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "@vercel/node": "^3.2.24",
+    "@vercel/node": "^5.9.7",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.13.0",
@@ -34,6 +35,6 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
-    "vite": "^5.4.9"
+    "vite": "^8.2.1"
   }
 }

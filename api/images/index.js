@@ -46,7 +46,7 @@ export default async function handler(req, res) {
                 expression: `folder:"${folder}"`,
                 sort_by: [{ created_at: "desc" }],
                 max_results: 100,
-                with_field: ["tags", "display_name"],
+                with_field: ["tags"],
             }),
         });
         if (!searchResponse.ok) {

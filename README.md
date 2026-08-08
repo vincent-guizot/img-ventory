@@ -113,5 +113,4 @@ variants throughout the component tree.
 
 - Uploads call Cloudinary's unsigned upload endpoint directly from the browser — no backend required for uploading.
 - Listing and deleting images go through the serverless functions in `api/`, which hold the API Secret server-side.
-- Deliberately excluded per product scope: authentication, analytics/charts, favorites, trash, rename, folders, sharing, and permissions. (Renaming an asset's display name in the Cloudinary console *is* reflected in the gallery, since the app reads Cloudinary's `display_name` field.)
-
+- Deliberately excluded per product scope: authentication, analytics/charts, favorites, trash, rename, folders, sharing, and permissions. (Renaming an asset's display name in the Cloudinary console _is_ reflected in the gallery, since the app reads Cloudinary's `display_name` field.)

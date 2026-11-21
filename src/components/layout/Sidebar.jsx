@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { StorageWidget } from "./StorageWidget";
 import { UserProfile } from "./UserProfile";
 const NAV_ITEMS = [
-  { to: "/gallery", label: "Gallery", icon: ImageIcon },
+  { to: "/", label: "Home", icon: ImageIcon, end: true },
   { to: "/upload", label: "Upload", icon: UploadCloud },
   { to: "/storage", label: "Storage", icon: HardDrive },
   { to: "/settings", label: "Settings", icon: Settings },
@@ -33,10 +33,11 @@ export function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
+            end={end}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-colors",

@@ -1,10 +1,11 @@
 import { HardDrive } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatBytes } from "@/lib/utils";
-import { useImages } from "@/features/gallery/hooks/useImages";
+import { useStorageStats } from "@/features/storage/hooks/useStorageStats";
 export function StorageWidget() {
-  const { data: images = [] } = useImages();
-  const totalBytes = images.reduce((sum, image) => sum + image.bytes, 0);
+  const { data: stats } = useStorageStats();
+  const imageCount = stats?.totalImages ?? 0;
+  const totalBytes = stats?.totalBytes ?? 0;
   return (
     <Link
       to="/storage"
@@ -15,7 +16,7 @@ export function StorageWidget() {
       </div>
       <div className="min-w-0">
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-          {images.length} image{images.length === 1 ? "" : "s"} uploaded
+          {imageCount} image{imageCount === 1 ? "" : "s"} uploaded
         </p>
         <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
           {formatBytes(totalBytes)} total

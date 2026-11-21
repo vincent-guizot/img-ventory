@@ -11,4 +11,14 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.js"],
+    include: ["tests/**/*.test.{js,jsx}"],
+    env: {
+      VITE_CLOUDINARY_CLOUD_NAME: "test-cloud",
+      VITE_CLOUDINARY_UPLOAD_PRESET: "test_preset",
+      VITE_CLOUDINARY_FOLDER: "img-ventory",
+    },
+  },
 });

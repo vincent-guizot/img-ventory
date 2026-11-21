@@ -15,6 +15,8 @@ const browserGlobals = {
   setTimeout: "readonly",
   clearTimeout: "readonly",
   localStorage: "readonly",
+  AbortController: "readonly",
+  IntersectionObserver: "readonly",
 };
 
 const nodeGlobals = {
@@ -64,6 +66,30 @@ export default [
     },
     rules: {
       "no-unused-vars": "warn",
+    },
+  },
+  {
+    files: ["tests/**/*.{js,jsx}", "vitest.setup.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        ...browserGlobals,
+        ...nodeGlobals,
+        globalThis: "readonly",
+        AbortSignal: "readonly",
+      },
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    plugins: { react },
+    rules: {
+      "react/jsx-uses-vars": "error",
+      "react/jsx-uses-react": "error",
+    },
+    settings: {
+      react: { version: "detect" },
     },
   },
   {

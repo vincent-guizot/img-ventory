@@ -10,20 +10,34 @@ export function UploadQueue({
   pendingCount,
   onRemove,
   onRetry,
+  onCancel,
   onClearAll,
+  onClearFinished,
   onUploadAll,
+  destinationLabel,
 }) {
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   if (items.length === 0) return null;
   // Nothing left to cancel once every file has finished uploading successfully.
   const hasCancellableItems = items.some((item) => item.status !== "success");
+  const hasFinishedItems = items.some((item) => item.status === "success");
   return (
     <Card className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5">
         <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
           {items.length} file{items.length === 1 ? "" : "s"} selected
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {hasFinishedItems && onClearFinished && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearFinished}
+              className="text-slate-500 dark:text-slate-400"
+            >
+              Clear finished
+            </Button>
+          )}
           {hasCancellableItems && (
             <Button
               variant="ghost"
@@ -39,6 +53,7 @@ export function UploadQueue({
             <Button size="sm" onClick={onUploadAll}>
               <UploadCloud className="h-3.5 w-3.5" />
               Upload {pendingCount} file{pendingCount === 1 ? "" : "s"}
+              {destinationLabel ? ` to ${destinationLabel}` : ""}
             </Button>
           )}
         </div>
@@ -51,6 +66,7 @@ export function UploadQueue({
               item={item}
               onRemove={onRemove}
               onRetry={onRetry}
+              onCancel={onCancel}
             />
           ))}
         </AnimatePresence>

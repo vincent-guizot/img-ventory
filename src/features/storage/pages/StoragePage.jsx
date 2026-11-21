@@ -12,15 +12,15 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { cloudinaryConfig } from "@/services/cloudinary.service";
 import { formatBytes } from "@/lib/utils";
-import { useImages } from "@/features/gallery/hooks/useImages";
+import { useStorageStats } from "../hooks/useStorageStats";
+import { useFolders } from "@/features/folders/hooks/useFolders";
 import { StorageStatCard } from "../components/StorageStatCard";
 export function StoragePage() {
-  const { data: images = [] } = useImages();
-  const totalBytes = images.reduce((sum, image) => sum + image.bytes, 0);
-  const formatCounts = images.reduce((acc, image) => {
-    acc[image.format] = (acc[image.format] ?? 0) + 1;
-    return acc;
-  }, {});
+  const { data: stats, isLoading, error } = useStorageStats();
+  const { data: folders = [] } = useFolders();
+  const imageCount = stats?.totalImages ?? 0;
+  const totalBytes = stats?.totalBytes ?? 0;
+  const formatCounts = stats?.formatCounts ?? {};
   const topFormat = Object.entries(formatCounts).sort(
     (a, b) => b[1] - a[1],
   )[0]?.[0];
@@ -35,13 +35,13 @@ export function StoragePage() {
         <StorageStatCard
           icon={ImageIcon}
           label="Total Images"
-          value={String(images.length)}
+          value={isLoading ? "…" : String(imageCount)}
           hint="uploaded so far"
         />
         <StorageStatCard
           icon={HardDrive}
           label="Total Size"
-          value={formatBytes(totalBytes)}
+          value={isLoading ? "…" : formatBytes(totalBytes)}
           hint="across all uploads"
         />
         <StorageStatCard
@@ -79,10 +79,10 @@ export function StoragePage() {
           <InfoRow
             icon={Folder}
             title="Folder"
-            description="Default upload destination."
+            description={`Root folder for all uploads (${folders.length} sub-folder${folders.length === 1 ? "" : "s"}).`}
             action={
               <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                / (root)
+                {cloudinaryConfig.folder}/
               </Badge>
             }
           />
@@ -105,11 +105,20 @@ export function StoragePage() {
         </div>
       </Card>
 
+      {error && (
+        <p className="text-xs text-red-500" role="alert">
+          Couldn't load storage stats: {error.message}
+        </p>
+      )}
+      {stats?.truncated && (
+        <p className="text-xs text-amber-600" role="status">
+          Totals are partial: the folder or page limit for statistics was reached.
+        </p>
+      )}
       <p className="text-xs text-slate-400 dark:text-slate-500">
-        Note: these stats reflect images uploaded from this browser only.
-        Cloudinary's unsigned upload API doesn't expose account-wide storage
-        quota or a full asset list to the client, so account-level totals aren't
-        shown here.
+        Note: these stats cover every image in the {cloudinaryConfig.folder}{" "}
+        folder and its sub-folders, read server-side from Cloudinary. Account-wide
+        storage quota isn't shown here.
       </p>
     </div>
   );

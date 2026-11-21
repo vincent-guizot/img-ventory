@@ -1,141 +1,137 @@
 import {
-  cloudinaryBasicAuth,
+  ApiError,
   getCloudinaryConfig,
-  httpsFetch,
-  signCloudinaryParams,
+  getFolderMode,
+  mapResource,
+  readJsonBody,
+  searchResources,
+  sendError,
 } from "../_lib/cloudinary.js";
-/** Adds an f_auto,q_auto thumbnail transformation to a Cloudinary secure_url. */
-function toThumbnailUrl(secureUrl) {
-  return secureUrl.replace(
-    "/upload/",
-    "/upload/c_fill,w_400,h_400,q_auto,f_auto/",
-  );
-}
-function mapResource(resource) {
-  return {
-    id: resource.asset_id ?? resource.public_id,
-    publicId: resource.public_id,
-    // Prefer display_name: this is what updates when you rename an asset
-    // in the Cloudinary console. `filename` stays frozen to the name the
-    // file had at upload time, so it never reflects a console rename.
-    fileName:
-      resource.display_name ??
-      resource.filename ??
-      resource.public_id.split("/").pop() ??
-      resource.public_id,
-    format: resource.format ?? "jpg",
-    mimeType: `image/${resource.format}`,
-    bytes: resource.bytes,
-    width: resource.width,
-    height: resource.height,
-    secureUrl: resource.secure_url,
-    thumbnailUrl: toThumbnailUrl(resource.secure_url),
-    folder: resource.folder ?? null,
-    tags: resource.tags ?? [],
-    // Cloudinary doesn't track "uploaded by" out of the box; placeholder to
-    // match the shape the UI expects.
-    uploadedBy: "vincent",
-    createdAt: resource.created_at,
-  };
-}
+import { buildListRequest } from "../_lib/listQuery.js";
+import {
+  deleteImage,
+  loadResourceInRoot,
+  moveResource,
+  renameImage,
+  requireFolderMode,
+  resolveTargetFolder,
+  setTags,
+} from "../_lib/operations.js";
+
+const ASSET_ID_RE = /^[a-f0-9]{32}$/;
+
+/**
+ * /api/images
+ *   GET    ?folder=&q=&format=&tag=&favorite=&sort=&order=&limit=&cursor=
+ *            Lists one folder (root when `folder` is empty) with cursor
+ *            pagination. Response: { images, nextCursor, totalCount, folder }.
+ *   GET    ?assetId=<id>   Single image details (must be inside the root).
+ *   DELETE ?publicId=<id>  Deletes one image (must be inside the root).
+ *   PATCH  { publicId, action: "rename"|"move"|"tags"|"favorite", ... }
+ */
 export default async function handler(req, res) {
-  if (req.method === "DELETE") {
-    return handleDelete(req, res);
-  }
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET, DELETE");
-    return res.status(405).json({ error: "Method not allowed" });
-  }
   try {
-    const { cloudName, apiKey, apiSecret, folder } = getCloudinaryConfig();
-    const searchResponse = await httpsFetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: cloudinaryBasicAuth(apiKey, apiSecret),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          expression: `folder:"${folder}"`,
-          sort_by: [{ created_at: "desc" }],
-          max_results: 100,
-          with_field: ["tags"],
-        }),
-      },
-    );
-    if (!searchResponse.ok) {
-      const detail = await searchResponse.text();
-      console.error(
-        "[api/images] Cloudinary search failed:",
-        searchResponse.status,
-        detail,
-      );
-      return res
-        .status(502)
-        .json({ error: "Failed to list images from Cloudinary" });
+    switch (req.method) {
+      case "GET":
+        return await handleGet(req, res);
+      case "DELETE":
+        return await handleDelete(req, res);
+      case "PATCH":
+        return await handlePatch(req, res);
+      default:
+        res.setHeader("Allow", "GET, DELETE, PATCH");
+        return res.status(405).json({ error: "Method not allowed" });
     }
-    const data = await searchResponse.json();
-    const images = (data.resources ?? []).map(mapResource);
-    // Images rarely change; let clients/CDN cache briefly.
-    res.setHeader("Cache-Control", "private, max-age=10");
-    return res.status(200).json({ images });
   } catch (error) {
-    console.error("[api/images] Unexpected error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendError(res, error, "api/images");
   }
 }
+
+async function handleGet(req, res) {
+  const config = getCloudinaryConfig();
+  const query = req.query ?? {};
+
+  if (query.assetId !== undefined) {
+    const assetId = query.assetId;
+    if (typeof assetId !== "string" || !ASSET_ID_RE.test(assetId)) {
+      throw new ApiError(400, "Invalid assetId");
+    }
+    const data = await searchResources(config, {
+      expression: `resource_type:image AND asset_id=${assetId}`,
+      max_results: 1,
+    });
+    const image = (data.resources ?? [])
+      .map((resource) => mapResource(resource, config.folder))
+      .find((mapped) => mapped.folderName !== null);
+    if (!image) throw new ApiError(404, "Image not found");
+    res.setHeader("Cache-Control", "private, max-age=10");
+    return res.status(200).json({ image });
+  }
+
+  const mode = await getFolderMode(config);
+  const { folder, body } = buildListRequest(query, {
+    root: config.folder,
+    mode,
+  });
+  const data = await searchResources(config, body);
+  const images = (data.resources ?? []).map((resource) =>
+    mapResource(resource, config.folder),
+  );
+  // Images rarely change; let clients/CDN cache briefly.
+  res.setHeader("Cache-Control", "private, max-age=10");
+  return res.status(200).json({
+    images,
+    nextCursor: data.next_cursor ?? null,
+    totalCount: data.total_count ?? images.length,
+    folder,
+  });
+}
+
 /**
  * Deletes a single image from Cloudinary by public_id, passed as
  * `?publicId=...` (see cloudinary.service.js for why it's a query param
  * rather than a dynamic /api/images/:publicId path segment).
  */
 async function handleDelete(req, res) {
-  const { publicId } = req.query;
+  const { publicId } = req.query ?? {};
   if (!publicId || Array.isArray(publicId)) {
     return res.status(400).json({ error: "Missing or invalid publicId" });
   }
-  try {
-    const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
-    const timestamp = Math.floor(Date.now() / 1000);
-    const signature = signCloudinaryParams(
-      { public_id: publicId, timestamp },
-      apiSecret,
-    );
-    const body = new URLSearchParams({
-      public_id: publicId,
-      timestamp: String(timestamp),
-      api_key: apiKey,
-      signature,
-    });
-    const destroyResponse = await httpsFetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
-      },
-    );
-    if (!destroyResponse.ok) {
-      const detail = await destroyResponse.text();
-      console.error(
-        "[api/images DELETE] Cloudinary destroy failed:",
-        destroyResponse.status,
-        detail,
-      );
-      return res
-        .status(502)
-        .json({ error: "Failed to delete image from Cloudinary" });
-    }
-    const data = await destroyResponse.json();
-    if (data.result !== "ok" && data.result !== "not found") {
-      return res
-        .status(502)
-        .json({ error: `Cloudinary destroy returned: ${data.result}` });
-    }
-    return res.status(200).json({ result: data.result, publicId });
-  } catch (error) {
-    console.error("[api/images DELETE] Unexpected error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+  const config = getCloudinaryConfig();
+  const resource = await loadResourceInRoot(config, publicId);
+  const { result } = await deleteImage(config, resource);
+  return res.status(200).json({ result, publicId });
+}
+
+async function handlePatch(req, res) {
+  const body = readJsonBody(req);
+  const { publicId, action } = body;
+  const config = getCloudinaryConfig();
+
+  if (!["rename", "move", "tags", "favorite"].includes(action)) {
+    throw new ApiError(400, "Invalid action");
   }
+  const resource = await loadResourceInRoot(config, publicId);
+
+  if (action === "rename") {
+    const mode = await requireFolderMode(config);
+    return res.status(200).json(await renameImage(config, mode, resource, body.name));
+  }
+  if (action === "move") {
+    const mode = await requireFolderMode(config);
+    const target = await resolveTargetFolder(config, body.folder);
+    return res
+      .status(200)
+      .json(await moveResource(config, mode, resource, target));
+  }
+  if (action === "tags") {
+    if (!Array.isArray(body.tags)) throw new ApiError(400, "tags must be an array");
+    return res.status(200).json(await setTags(config, resource, { tags: body.tags }));
+  }
+  if (typeof body.favorite !== "boolean") {
+    throw new ApiError(400, "favorite must be a boolean");
+  }
+  return res
+    .status(200)
+    .json(await setTags(config, resource, { favorite: body.favorite }));
 }
